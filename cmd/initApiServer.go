@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	startcruds "github.com/WelintonJunior/genericApiGolang/commons/startCruds"
 	"github.com/WelintonJunior/genericApiGolang/infrastructure"
 	"github.com/gofiber/contrib/fiberzerolog"
 	"github.com/gofiber/fiber/v2"
@@ -90,6 +91,8 @@ func SetupApp() (*fiber.App, error) {
 	apiV1 := app.Group("api/v1")
 
 	apiV1.Get("/docs/*", swagger.HandlerDefault)
+
+	startcruds.StartCruds(app)
 
 	return app, nil
 }
