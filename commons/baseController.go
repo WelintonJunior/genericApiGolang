@@ -40,6 +40,7 @@ func (r *GenericControllers[T]) BuildDefaultRoutes(server *fiber.App) {
 
 func (r *GenericControllers[T]) BuildCreateNewRoute(server *fiber.App, handler fiber.Handler, method, route string) {
 	routeStr := fmt.Sprintf("/%s/%s", r.BasePath, route)
+	fmt.Println(routeStr)
 
 	switch method {
 	case "GET":
@@ -58,6 +59,7 @@ func (r *GenericControllers[T]) BuildCreateNewRoute(server *fiber.App, handler f
 }
 
 func (r *GenericControllers[T]) BuildGetAllRoute(server *fiber.App) {
+	fmt.Println(fmt.Sprintf("/%s/getAll", r.BasePath))
 	server.Get(fmt.Sprintf("/%s/getAll", r.BasePath), func(c *fiber.Ctx) error {
 		return r.Handler.GetAll(c)
 	})
