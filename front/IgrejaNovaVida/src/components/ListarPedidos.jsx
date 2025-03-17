@@ -57,8 +57,8 @@ export default function ListarPedidos() {
     };
 
     return (
-        <Box sx={{ maxWidth: "900", margin: "auto", mt: 5, p: 3, backgroundColor: "#f5f5f5", borderRadius: 2 }}>
-            <Paper elevation={3} sx={{ padding: 3 }}>
+        <Box sx={{ maxWidth: "900", margin: "auto"}}>
+            <Paper sx={{boxShadow: "none"}}>
                 <Typography variant="h5" gutterBottom>Lista de Pedidos</Typography>
 
                 {loading ? (
@@ -67,7 +67,7 @@ export default function ListarPedidos() {
                     </Box>
                 ) : (
                     <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
-                        <Table stickyHeader>
+                        <Table sx={{border: "1px solid black"}} stickyHeader>
                             <TableHead>
                                 <TableRow>
                                     <TableCell><strong>ID</strong></TableCell>

@@ -17,7 +17,7 @@ export default function ModalComponent({ open, handleClose, children }) {
         p: 4,
         borderRadius: 2
       }}>
-        <Typography sx={{ mt: 2 }}>
+        <Typography>
           {children}
         </Typography>
         <Button sx={{ mt: 2 }} variant="contained" onClick={handleClose}>

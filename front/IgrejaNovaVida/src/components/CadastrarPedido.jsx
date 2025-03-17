@@ -91,8 +91,8 @@ export default function CadastrarPedido() {
     };
 
     return (
-        <Box sx={{ maxWidth: 600, margin: "auto", mt: 5, p: 3, backgroundColor: "#f5f5f5", borderRadius: 2 }}>
-            <Paper elevation={3} sx={{ padding: 3, maxHeight: "80vh", overflowY: "auto" }}>
+        <Box sx={{ maxWidth: 600, margin: "auto"}}>
+            <Paper sx={{ boxShadow:"none", padding: 3, maxHeight: "80vh", overflowY: "auto" }}>
                 <Typography variant="h5" gutterBottom>Cadastro de Pedido</Typography>
 
                 <form onSubmit={endOrder}>

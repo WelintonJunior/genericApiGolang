@@ -97,8 +97,8 @@ export default function VerPedido() {
     
     
     return (
-        <Box sx={{ maxWidth: 900, margin: "auto", mt: 5, p: 3, backgroundColor: "#f5f5f5", borderRadius: 2 }}>
-            <Paper elevation={3} sx={{ padding: 3, maxHeight: "80vh", overflowY: "auto" }}>
+        <Box sx={{ maxWidth: 900, margin: "auto"}}>
+            <Paper sx={{ boxShadow: "none", padding: 3, maxHeight: "80vh", overflowY: "auto" }}>
                 <Typography variant="h5" gutterBottom>Ver Pedido</Typography>
 
                 <form onSubmit={getOrder}>
