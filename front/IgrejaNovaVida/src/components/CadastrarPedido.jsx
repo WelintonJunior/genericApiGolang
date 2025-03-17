@@ -1,146 +1,229 @@
 import { useState, useEffect } from "react";
+import {
+    Box, Button, Grid, MenuItem, Select, TextField, Typography, Paper, Card, CardContent, IconButton
+} from "@mui/material";
+import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
+import { GetOrCreateCustomer } from "../services/customer";
+import { BACK_END_HOST } from "../App";
+import GetAllIngredients from "../services/ingredients";
+import { GetAllSnacks } from "../services/snacks";
+import { CreateOrder } from "../services/order";
 
 export default function CadastrarPedido() {
-    const [lanches, setLanches] = useState([]); // Lista de lanches no pedido
-    const [snacksDisponiveis, setSnacksDisponiveis] = useState([]); // Lista de lanches da API
-
-    const BACK_END_HOST = import.meta.env.VITE_BACK_END_HOST; // Definição da variável de ambiente
-
-    // Função para buscar os lanches da API
-    async function GetAllSnacks() {
-        try {
-            const response = await fetch(`${BACK_END_HOST}/snack/getAll`);
-            if (!response.ok) throw new Error("Erro ao buscar lanches");
-            const result = await response.json();
-            setSnacksDisponiveis(result); 
-        } catch (error) {
-            console.error("Erro ao buscar lanches:", error);
-        }
-    }
+    const [lanches, setLanches] = useState([]);
+    const [snacksDisponiveis, setSnacksDisponiveis] = useState([]);
+    const [ingredientesDisponiveis, setIngredientesDisponiveis] = useState([]);
+    const [clienteNome, setClienteNome] = useState("");
+    const [clienteEndereco, setClienteEndereco] = useState("");
+    const [clienteNumero, setClienteNumero] = useState("");
 
     useEffect(() => {
-        GetAllSnacks();
+        GetAllSnacks(BACK_END_HOST, setSnacksDisponiveis);
+        GetAllIngredients(BACK_END_HOST, setIngredientesDisponiveis)
     }, []);
 
-    const adicionarLanche = () => {
-        setLanches([...lanches, { id: Date.now(), lancheId: "", quantidade: 1, personalizacao: "" }]);
+    const addSnack = () => {
+        setLanches([...lanches, {
+            id: Date.now(),
+            lancheId: "",
+            quantidade: 1,
+            adicionarIngredientes: [],
+            removerIngredientes: []
+        }]);
     };
 
-    const atualizarLanche = (id, campo, valor) => {
+    const removeSnack = (id) => {
+        setLanches(lanches.filter(lanche => lanche.id !== id));
+    };
+
+    const updateSnack = (id, campo, valor) => {
         setLanches(lanches.map(lanche => (lanche.id === id ? { ...lanche, [campo]: valor } : lanche)));
     };
 
-    // Função para buscar ou criar o cliente
-    const buscarOuCriarCliente = async (nome, endereco) => {
-        try {
-            // Verificar se o cliente já existe pelo nome
-            const response = await fetch(`${BACK_END_HOST}/customer/getByName/${nome}`);
-            if (response.ok) {
-                const cliente = await response.json();
-                return cliente; // Cliente encontrado
-            }
-
-            // Se não encontrar, criar um novo cliente
-            const novoCliente = {
-                name: nome,
-                address: endereco,
-            };
-
-            const createResponse = await fetch(`${BACK_END_HOST}/customer/create`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(novoCliente),
-            });
-
-            if (!createResponse.ok) {
-                throw new Error("Erro ao criar cliente");
-            }
-
-            const clienteCriado = await createResponse.json();
-            return clienteCriado; // Retorna o cliente criado
-        } catch (error) {
-            console.error("Erro ao buscar ou criar cliente:", error);
-            throw error;
-        }
+    const resetForm = () => {
+        setClienteNome("");
+        setClienteEndereco("");
+        setLanches([]);
+        setClienteNumero("");
     };
 
-    // Função para enviar o pedido
-    const finalizarPedido = async (e) => {
-        e.preventDefault(); // Evitar o comportamento padrão de submit do formulário
-
-        const nomeCliente = e.target.clienteNome.value;
-        const enderecoCliente = e.target.clienteEndereco.value;
+    const endOrder = async (e) => {
+        e.preventDefault();
 
         try {
-            // Verificar ou criar o cliente
-            const cliente = await buscarOuCriarCliente(nomeCliente, enderecoCliente);
+            if (lanches.length === 0) {
+                alert("É necessário adicionar ao menos um lanche.");
+                return;
+            }
 
-            // Estrutura do pedido
             const pedido = {
-                paid: false, // Pedido não pago inicialmente
-                delivered: false, // Pedido não entregue inicialmente
-                customer_id: cliente.ID, // ID do cliente
-                customer_name: cliente.name, // Nome do cliente
-                customer_address: cliente.address, // Endereço do cliente
+                paid: false,
+                delivered: false,
                 lanches: lanches.map(lanche => ({
-                    snack_id: lanche.lancheId,  // ID do lanche selecionado
-                    quantidade: lanche.quantidade, // Quantidade do lanche
-                    personalizacao: lanche.personalizacao, // Personalização
+                    snack_id: parseInt(lanche.lancheId),
+                    quantidade: parseInt(lanche.quantidade),
+                    adicionar_ingredientes: lanche.adicionarIngredientes.map(id => ({
+                        id: parseInt(id)
+                    })),
+                    remover_ingredientes: lanche.removerIngredientes.map(id => ({
+                        id: parseInt(id)
+                    }))
                 }))
             };
 
-            const response = await fetch(`${BACK_END_HOST}/order/create`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(pedido),
-            });
-
-            if (!response.ok) {
-                throw new Error("Erro ao finalizar o pedido");
+            if (pedido.lanches.some(lanche => isNaN(lanche.snack_id) || lanche.snack_id === "")) {
+                alert("É necessário selecionar um lanche válido.");
+                return;
             }
 
-            const result = await response.json();
-            console.log("Pedido finalizado com sucesso:", result);
+            const cliente = await GetOrCreateCustomer(BACK_END_HOST, clienteNome, clienteEndereco, clienteNumero);
+
+            pedido.customer_id = cliente.ID;
+            pedido.customer_name = cliente.name;
+            pedido.customer_address = cliente.address;
+            pedido.customer_number = parseInt(cliente.number);
+
+            CreateOrder(BACK_END_HOST, pedido)
+            resetForm();
         } catch (error) {
             console.error("Erro ao finalizar pedido:", error);
         }
     };
 
     return (
-        <form onSubmit={finalizarPedido}>
-            <input type="text" name="clienteNome" placeholder="Nome do cliente" required />
-            <input type="text" name="clienteEndereco" placeholder="Endereço do cliente" required />
+        <Box sx={{ maxWidth: 600, margin: "auto", mt: 5, p: 3, backgroundColor: "#f5f5f5", borderRadius: 2 }}>
+            <Paper elevation={3} sx={{ padding: 3, maxHeight: "80vh", overflowY: "auto" }}>
+                <Typography variant="h5" gutterBottom>Cadastro de Pedido</Typography>
 
-            {/* Botão para adicionar lanche */}
-            <button type="button" onClick={adicionarLanche}>Adicionar Lanche</button>
+                <form onSubmit={endOrder}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                label="Nome do Cliente"
+                                variant="outlined"
+                                required
+                                value={clienteNome}
+                                onChange={(e) => setClienteNome(e.target.value)}
+                            />
+                        </Grid>
 
-            {lanches.map((lanche, index) => (
-                <div key={index} style={{ marginTop: "10px", padding: "10px", border: "1px solid #ccc" }}>
-                    <label>Escolha o lanche:</label>
-                    <select value={lanche.lancheId} onChange={(e) => atualizarLanche(lanche.id, "lancheId", e.target.value)}>
-                        <option value="">Selecione...</option>
-                        {snacksDisponiveis.map(snack => (
-                            <option key={snack.ID} value={snack.ID}>{snack.Name}</option>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                label="Endereço do Cliente"
+                                variant="outlined"
+                                required
+                                value={clienteEndereco}
+                                onChange={(e) => setClienteEndereco(e.target.value)}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                label="Número do Cliente"
+                                variant="outlined"
+                                required
+                                value={clienteNumero}
+                                type="number"
+                                onChange={(e) => setClienteNumero(e.target.value)}
+                            />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                            <Button variant="contained" color="primary" onClick={addSnack} startIcon={<AddCircleOutline />}>
+                                Adicionar Lanche
+                            </Button>
+                        </Grid>
+
+                        {lanches.map((lanche) => (
+                            <Grid item xs={12} key={lanche.id}>
+                                <Card variant="outlined">
+                                    <CardContent>
+                                        <Typography variant="h6">Lanche</Typography>
+
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12}>
+                                                <Select
+                                                    fullWidth
+                                                    value={lanche.lancheId}
+                                                    onChange={(e) => updateSnack(lanche.id, "lancheId", e.target.value)}
+                                                    displayEmpty
+                                                >
+                                                    <MenuItem value="">Selecione um lanche...</MenuItem>
+                                                    {snacksDisponiveis.map(snack => (
+                                                        <MenuItem key={snack.ID} value={snack.ID}>{snack.Name}</MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </Grid>
+
+                                            <Grid item xs={6}>
+                                                <TextField
+                                                    type="number"
+                                                    label="Qtd"
+                                                    variant="outlined"
+                                                    fullWidth
+                                                    value={lanche.quantidade}
+                                                    inputProps={{ min: 1 }}
+                                                    onChange={(e) => updateSnack(lanche.id, "quantidade", e.target.value)}
+                                                />
+                                            </Grid>
+
+                                            <Grid item xs={12}>
+                                                <Typography variant="subtitle1">Personalização</Typography>
+
+                                                <Grid item xs={12}>
+                                                    <Typography variant="subtitle1">Adicionar Ingredientes</Typography>
+                                                    <Select
+                                                        multiple
+                                                        fullWidth
+                                                        value={lanche.adicionarIngredientes}
+                                                        onChange={(e) => updateSnack(lanche.id, "adicionarIngredientes", e.target.value)}
+                                                        displayEmpty
+                                                    >
+                                                        {ingredientesDisponiveis
+                                                            .filter(ing => ing.Price > 0)
+                                                            .map(ing => (
+                                                                <MenuItem key={ing.ID} value={ing.ID}>
+                                                                    {ing.Name} (+R$ {ing.Price.toFixed(2)})
+                                                                </MenuItem>
+                                                            ))}
+                                                    </Select>
+                                                </Grid>
+
+                                                <Grid item xs={12}>
+                                                    <Typography variant="subtitle1">Remover Ingredientes</Typography>
+                                                    <Select
+                                                        multiple
+                                                        fullWidth
+                                                        value={lanche.removerIngredientes}
+                                                        onChange={(e) => updateSnack(lanche.id, "removerIngredientes", e.target.value)}
+                                                        displayEmpty
+                                                    >
+                                                        {ingredientesDisponiveis
+                                                            .map(ing => (
+                                                                <MenuItem key={ing.ID} value={ing.ID}>
+                                                                    {ing.Name}
+                                                                </MenuItem>
+                                                            ))}
+                                                    </Select>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
                         ))}
-                    </select> <br />
 
-                    <label>Quantidade:</label>
-                    <input type="number" value={lanche.quantidade} min="1" onChange={(e) => atualizarLanche(lanche.id, "quantidade", e.target.value)} /> <br />
-
-                    <label>Personalização:</label>
-                    <select value={lanche.personalizacao} onChange={(e) => atualizarLanche(lanche.id, "personalizacao", e.target.value)}>
-                        <option value="">Nenhuma</option>
-                        <option value="adicionar">Adicionar Ingrediente</option>
-                        <option value="remover">Remover Ingrediente</option>
-                    </select> <br />
-                </div>
-            ))}
-
-            <button type="submit">Finalizar Pedido</button>
-        </form>
+                        <Grid item xs={12}>
+                            <Button type="submit" variant="contained" color="success" fullWidth>
+                                Finalizar Pedido
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </form>
+            </Paper>
+        </Box>
     );
 }

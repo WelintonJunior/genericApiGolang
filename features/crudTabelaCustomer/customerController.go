@@ -30,6 +30,7 @@ func StartCustomer(server *fiber.App) {
 
 	//Custom
 	CustomerController.BuildCreateNewRoute(server, CustomerHandler.GetByName, "GET", "getByName")
+	CustomerController.BuildCreateNewRoute(server, CustomerHandler.GetByNameAndAddress, "GET", "getByNameAndAddress")
 	//Default
 	CustomerController.BuildDefaultRoutes(server)
 }

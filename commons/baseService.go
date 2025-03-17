@@ -199,12 +199,16 @@ func (s *GenericService[T]) Update(tx *gorm.DB, resource T, id int) (*T, *utils.
 		query = query.Where(fmt.Sprintf("%s IS NULL", s.DeletedAtStr))
 	}
 
-	result := query.Updates(&resource)
+	fmt.Printf("Updating resource: %+v\n", resource)
+
+	result := query.Select("*").Updates(&resource)
+
 	if result.Error != nil {
 		validationError.Add(result.Error)
 	}
 
 	if result.RowsAffected == 0 {
+		fmt.Printf("Nenhuma linha afetada ao tentar atualizar o recurso com ID %d\n", id)
 		validationError.Add(fmt.Errorf("resource with id %d not found", id))
 	}
 

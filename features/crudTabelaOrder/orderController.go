@@ -31,14 +31,14 @@ func StartOrder(server *fiber.App) {
 	OrderController := NewOrderController(*baseController)
 
 	//Custom
-	OrderController.BuildCreateNewRoute(server, OrderHandler.CustomHandler, "GET", "custom")
+	OrderController.BuildCreateNewRoute(server, OrderHandler.GetByCustomerName, "GET", "getByCustomerName")
+
 	//Default
 	OrderController.BuildDefaultRoutes(server)
 }
 
-// Override
-func (c *OrderController) BuildCreateRoute(server *fiber.App) {
-	server.Post(fmt.Sprintf("/%s/criar", c.BasePath), func(ctx *fiber.Ctx) error {
+func (c *OrderController) BuildGetAllRoute(server *fiber.App) {
+	server.Post(fmt.Sprintf("/%s/getAll", c.BasePath), func(ctx *fiber.Ctx) error {
 		return c.Handler.Create(ctx)
 	})
 }

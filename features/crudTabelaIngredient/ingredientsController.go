@@ -27,7 +27,7 @@ func StartIngredient(server *fiber.App) {
 	baseHandler := commons.NewGenericHandler[types.Ingredient](IngredientService)
 	IngredientHandler := NewIngredientHandler(*baseHandler)
 
-	baseController := commons.NewGenericController[types.Ingredient]("Ingredient", IngredientHandler, IngredientService)
+	baseController := commons.NewGenericController[types.Ingredient]("ingredient", IngredientHandler, IngredientService)
 	IngredientController := NewIngredientController(*baseController)
 
 	//Custom

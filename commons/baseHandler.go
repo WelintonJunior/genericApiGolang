@@ -29,9 +29,13 @@ func NewGenericHandler[T any](Service BaseServices[T]) *GenericHandlers[T] {
 
 func (h *GenericHandlers[T]) Create(c *fiber.Ctx) error {
 	var resource T
+
 	if err := c.BodyParser(&resource); err != nil {
+		fmt.Println(err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"errors": utils.ValidationError{Errors: []string{err.Error()}}})
 	}
+
+	fmt.Println(resource)
 
 	var resourceCreated *T
 	var validationError *utils.ValidationError
@@ -136,7 +140,7 @@ func (h *GenericHandlers[T]) GetAll(c *fiber.Ctx) error {
 	})
 
 	pageStr := c.Query("page", "1")
-	pageSizeStr := c.Query("pageSize", "10")
+	pageSizeStr := c.Query("pageSize", "50")
 
 	pageInt, err := strconv.Atoi(pageStr)
 	if err != nil {

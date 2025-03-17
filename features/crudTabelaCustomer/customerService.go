@@ -61,3 +61,26 @@ func (s *CustomerService) GetByName(name string) (*types.Customer, *utils.Valida
 
 	return &result, nil
 }
+
+func (s *CustomerService) GetByNameAndAddress(name, address string) (*types.Customer, *utils.ValidationError) {
+	var validationError utils.ValidationError
+	var result types.Customer
+
+	// Correção na consulta para garantir que o "name" seja usado corretamente
+	query := infrastructure.DB.Where("name = ? and address = ?", name, address)
+	if s.EnableSoftDelete {
+		query = query.Where(fmt.Sprintf("%s IS NULL", s.DeletedAtStr))
+	}
+
+	err := query.First(&result).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			validationError.Add(fmt.Errorf("resource with name %s not found", name)) // Corrigido o formato da string
+		} else {
+			validationError.Add(err) // Passando o erro diretamente
+		}
+		return nil, &validationError
+	}
+
+	return &result, nil
+}

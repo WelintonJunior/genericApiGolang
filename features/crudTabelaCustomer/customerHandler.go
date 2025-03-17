@@ -28,3 +28,16 @@ func (h *CustomerHandler) GetByName(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(result)
 }
+
+func (h *CustomerHandler) GetByNameAndAddress(c *fiber.Ctx) error {
+	nameParam := c.Query("name")
+	addressParam := c.Query("address")
+
+	customerSerivce := CustomerService{}
+	result, validationError := customerSerivce.GetByNameAndAddress(nameParam, addressParam)
+	if validationError != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"errors": validationError.Errors})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(result)
+}

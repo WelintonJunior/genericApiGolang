@@ -25,7 +25,7 @@ var crudStarters = []CrudStarter{
 
 func StartCruds(server *fiber.App) {
 
-	err := infrastructure.DB.AutoMigrate(&types.Customer{}, &types.Order{}, &types.Snack{}, &types.Addition{}, &types.Ingredient{})
+	err := infrastructure.DB.AutoMigrate(&types.Customer{}, &types.Order{}, &types.Snack{}, &types.Addition{}, &types.Ingredient{}, &types.OrderSnack{})
 	if err != nil {
 		log.Fatal("Erro na migration:", err)
 	}

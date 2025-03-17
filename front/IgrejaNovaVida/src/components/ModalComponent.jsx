@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 
-export default function ModalComponent({ open, handleClose, title, children }) {
+export default function ModalComponent({ open, handleClose, children }) {
   return (
     <Modal open={open} onClose={handleClose}>
       <Box sx={{
@@ -11,15 +11,12 @@ export default function ModalComponent({ open, handleClose, title, children }) {
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: 400,
+        width: '70%',
         bgcolor: 'background.paper',
         boxShadow: 24,
         p: 4,
         borderRadius: 2
       }}>
-        <Typography variant="h6" component="h2">
-          {title}
-        </Typography>
         <Typography sx={{ mt: 2 }}>
           {children}
         </Typography>
