@@ -39,6 +39,6 @@ func StartOrder(server *fiber.App) {
 
 func (c *OrderController) BuildGetAllRoute(server *fiber.App) {
 	server.Post(fmt.Sprintf("/%s/getAll", c.BasePath), func(ctx *fiber.Ctx) error {
-		return c.Handler.Create(ctx)
+		return c.Handler.GetAll(ctx)
 	})
 }

@@ -58,6 +58,9 @@ export async function CreateOrder(BACK_END_HOST, order) {
 
 export async function UpdateOrder(BACK_END_HOST, updatedOrder) {
     try {
+
+        console.log(updatedOrder)
+
         const newUpdateOrder = {
             id: updatedOrder.id,
             paid: updatedOrder.paid,

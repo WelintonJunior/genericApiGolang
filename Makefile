@@ -25,7 +25,7 @@ sql_up:
 		-e MYSQL_USER=${DB_USER} \
 		-e MYSQL_PASSWORD=${DB_PASS} \
 		-p ${DB_PORT}:3306 \
-		-d --rm mysql:8.0
+		-d mysql:8.0
 	@echo "Aguardando inicialização do MySQL..."
 	@sleep 30
 	@echo "Container inicializado com sucesso"
