@@ -36,6 +36,26 @@ export async function GetAllOrders(BACK_END_HOST) {
     }
 }
 
+export async function GetCount(BACK_END_HOST) {
+    try {
+        const response = await fetch(`${BACK_END_HOST}/order/getCount`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) {
+            throw new Error("Erro ao buscar o pedidos");
+        }
+
+
+        const data = await response.json();
+        return data
+    }
+    catch (error) {
+        console.error("Erro ao buscar pedidos:", error);
+    }
+}
+
 export async function CreateOrder(BACK_END_HOST, order) {
     try {
         const response = await fetch(`${BACK_END_HOST}/order/create`, {

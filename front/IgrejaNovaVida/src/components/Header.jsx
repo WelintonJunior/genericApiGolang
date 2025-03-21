@@ -5,18 +5,17 @@ export default function Header({ abrirModal }) {
   return (
     <Box sx={{
       display: "flex",
-      justifyContent: "space-between",
       padding: 3
     }}>
-      <Button variant="contained" color="primary" onClick={() => abrirModal('cadastrar')}>
+      <Button sx={{padding: "15px"}} variant="contained" color="primary" onClick={() => abrirModal('cadastrar')}>
         Cadastrar Pedido
       </Button>
-      <Button variant="contained" color="primary" onClick={() => abrirModal('listar')}>
+      <Button sx={{marginLeft: "25px"}} variant="contained" color="primary" onClick={() => abrirModal('listar')}>
         Listar Pedido
       </Button>
-      <Button variant="contained" color="primary" onClick={() => abrirModal('ver')}>
+      {/* <Button variant="contained" color="primary" onClick={() => abrirModal('ver')}>
         Ver Pedido
-      </Button>
+      </Button> */}
     </Box>
   );
 }

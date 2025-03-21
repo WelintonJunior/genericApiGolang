@@ -24,9 +24,20 @@ func NewOrderHandler(handler commons.GenericHandlers[types.Order]) *OrderHandler
 func (h *OrderHandler) GetByCustomerName(c *fiber.Ctx) error {
 	nameParam := c.Query("name")
 
-	customerSerivce := OrderService{}
-	result, validationError := customerSerivce.GetByCustomerName(nameParam)
+	orderService := OrderService{}
+	result, validationError := orderService.GetByCustomerName(nameParam)
 	if validationError != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"errors": validationError.Errors})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(result)
+}
+
+func (h *OrderHandler) GetCount(c *fiber.Ctx) error {
+	orderService := OrderService{}
+	result, validationError := orderService.GetCount()
+	if validationError != nil {
+		fmt.Println(validationError)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"errors": validationError.Errors})
 	}
 

@@ -1,6 +1,7 @@
 package crudTabelaOrder
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/WelintonJunior/genericApiGolang/commons"
@@ -65,6 +66,29 @@ func (s *OrderService) GetByCustomerName(name string) (*types.Order, *utils.Vali
 	}
 
 	return &order, nil
+}
+
+func (s *OrderService) GetCount() (*int, *utils.ValidationError) {
+	var validationError utils.ValidationError
+	var count int
+
+	query := infrastructure.DB.Table("order").Select("count(*)")
+
+	if s.EnableSoftDelete {
+		query = query.Where(fmt.Sprintf("%s IS NULL", s.DeletedAtStr))
+	}
+
+	err := query.Row().Scan(&count)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			validationError.Add(fmt.Errorf("resources not found"))
+		} else {
+			validationError.Add(err)
+		}
+		return nil, &validationError
+	}
+
+	return &count, nil
 }
 
 func (s *OrderService) GetAll(paramValues, paramNames []string, page, pageSize int, sortBy, sortDir string) ([]*types.Order, *utils.ValidationError) {
