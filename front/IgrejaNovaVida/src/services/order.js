@@ -107,3 +107,27 @@ export async function UpdateOrder(BACK_END_HOST, updatedOrder) {
         console.error("Erro ao buscar pedido:", error);
     }
 }
+
+export async function DeleteOrder(BACK_END_HOST, id) {
+    try {
+
+        const response = await fetch(`${BACK_END_HOST}/order/deleteOrderSnackAndOrder?id=${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        const responseText = await response.text();
+
+        if (!response.ok) {
+            throw new Error(`Erro ao atualizar pedido: ${responseText}`);
+        }
+
+        return JSON.parse(responseText);
+    } catch (error) {
+        console.error("Erro ao buscar pedido:", error);
+    }
+}
+
+

@@ -4,9 +4,10 @@ import {
     Checkbox, CircularProgress, Card, CardContent, TextField, InputAdornment
 } from "@mui/material";
 import { BACK_END_HOST } from "../App";
-import { GetAllOrders, UpdateOrder, GetCount } from "../services/order";
+import { GetAllOrders, UpdateOrder, GetCount, DeleteOrder } from "../services/order";
 import { GetSnackById } from "../services/snacks";
 import SearchIcon from "@mui/icons-material/Search";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 export default function ListarPedidos() {
     const [loading, setLoading] = useState(false);
@@ -114,12 +115,26 @@ export default function ListarPedidos() {
         }
     };
 
+    const handleDeleteOrder = async (orderId) => {
+        if (!window.confirm("Tem certeza que deseja excluir este pedido?")) return;
+
+        try {
+            await DeleteOrder(BACK_END_HOST, orderId);
+            setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
+            setFilteredOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
+            alert("Pedido excluído com sucesso!");
+        } catch (error) {
+            console.error("Erro ao excluir pedido:", error);
+            alert("Erro ao excluir pedido. Tente novamente.");
+        }
+    };
+
     return (
         <Box sx={{ maxWidth: 900, margin: "auto", p: 1 }}>
         <Paper sx={{ p: 3, borderRadius: 3, boxShadow: 4 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                 <Typography variant="h5"><strong>Lista de Pedidos</strong></Typography>
-                <Typography variant="h6">Total de pedidos: {totalOrders}</Typography>
+                <Typography variant="h6">Total de lanches: {totalOrders}</Typography>
             </Box>
 
             <TextField
@@ -143,47 +158,44 @@ export default function ListarPedidos() {
                     </Box>
                 ) : (
                     <TableContainer component={Paper} sx={{ maxHeight: 300, overflowY: "auto" }}>
-                        <Table stickyHeader>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell><strong>ID</strong></TableCell>
-                                    <TableCell><strong>Cliente</strong></TableCell>
-                                    <TableCell><strong>Pago</strong></TableCell>
-                                    <TableCell><strong>Entregue</strong></TableCell>
-                                    <TableCell><strong>Ação</strong></TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {filteredOrders.map((order) => (
-                                    <TableRow key={order.id} hover>
-                                        <TableCell>{order.id}</TableCell>
-                                        <TableCell>{order.customer?.Name || "Desconhecido"}</TableCell>
-                                        <TableCell>
-                                            <Checkbox
-                                                checked={order.paid}
-                                                onChange={(e) => handleUpdateStatus(order.id, "paid", e.target.checked)}
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <Checkbox
-                                                checked={order.delivered}
-                                                onChange={(e) => handleUpdateStatus(order.id, "delivered", e.target.checked)}
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <Button
-                                                variant="contained"
-                                                size="small"
-                                                onClick={() => handleSelectOrder(order)}
-                                            >
-                                                Ver detalhes
+                    <Table stickyHeader>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell><strong>#</strong></TableCell>
+                                <TableCell><strong>Cliente</strong></TableCell>
+                                <TableCell><strong>Pago</strong></TableCell>
+                                <TableCell><strong>Entregue</strong></TableCell>
+                                <TableCell><strong>Ação</strong></TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {filteredOrders.map((order, index) => (
+                                <TableRow key={order.id} hover>
+                                    <TableCell>{index + 1}</TableCell> {/* Exibe a posição do pedido */}
+                                    <TableCell>{order.customer?.Name || "Desconhecido"}</TableCell>
+                                    <TableCell>
+                                        <Checkbox
+                                            checked={order.paid}
+                                            onChange={(e) => handleUpdateStatus(order.id, "paid", e.target.checked)}
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Checkbox
+                                            checked={order.delivered}
+                                            onChange={(e) => handleUpdateStatus(order.id, "delivered", e.target.checked)}
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                            <Button variant="contained" size="small" onClick={() => handleSelectOrder(order)}>Ver detalhes</Button>
+                                            <Button variant="contained" color="error" size="small" sx={{ ml: 1 }} onClick={() => handleDeleteOrder(order.id)}>
+                                                <DeleteIcon />
                                             </Button>
                                         </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
                 )}
 
                 {

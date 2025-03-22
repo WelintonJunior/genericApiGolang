@@ -33,6 +33,7 @@ func StartOrder(server *fiber.App) {
 	//Custom
 	OrderController.BuildCreateNewRoute(server, OrderHandler.GetByCustomerName, "GET", "getByCustomerName")
 	OrderController.BuildCreateNewRoute(server, OrderHandler.GetCount, "GET", "getCount")
+	OrderController.BuildCreateNewRoute(server, OrderHandler.DeleteOrderSnackAndOrder, "DELETE", "deleteOrderSnackAndOrder")
 
 	//Default
 	OrderController.BuildDefaultRoutes(server)

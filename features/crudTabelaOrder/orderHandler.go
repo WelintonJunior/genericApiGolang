@@ -33,6 +33,18 @@ func (h *OrderHandler) GetByCustomerName(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(result)
 }
 
+func (h *OrderHandler) DeleteOrderSnackAndOrder(c *fiber.Ctx) error {
+	id := c.QueryInt("id")
+
+	orderService := OrderService{}
+	validationError := orderService.DeleteOrderSnackAndOrder(id)
+	if validationError != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"errors": validationError.Errors})
+	}
+
+	return c.Status(fiber.StatusOK).JSON("Ok")
+}
+
 func (h *OrderHandler) GetCount(c *fiber.Ctx) error {
 	orderService := OrderService{}
 	result, validationError := orderService.GetCount()

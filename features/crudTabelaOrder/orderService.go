@@ -22,12 +22,21 @@ func NewOrderService(service commons.GenericService[types.Order]) *OrderService 
 }
 
 // Override
-/*
-func (s *OrderService) Delete(tx *gorm.DB, id int) *utils.ValidationError {
+func (s *OrderService) DeleteOrderSnackAndOrder(id int) *utils.ValidationError {
 	validationError := utils.ValidationError{}
-	validationError.Add(fmt.Errorf("Erro"))
-	return &validationError
-} */
+
+	if err := infrastructure.DB.Where("order_id = ?", id).Delete(&types.OrderSnack{}).Error; err != nil {
+		validationError.Add(fmt.Errorf("erro ao deletar order_snacks: %v", err))
+		return &validationError
+	}
+
+	if err := infrastructure.DB.Where("id = ?", id).Delete(&types.Order{}).Error; err != nil {
+		validationError.Add(fmt.Errorf("erro ao deletar pedido: %v", err))
+		return &validationError
+	}
+
+	return nil
+}
 
 // Override
 /*func (s *OrderService) GetById(id int) (Order, error) {
@@ -72,7 +81,7 @@ func (s *OrderService) GetCount() (*int, *utils.ValidationError) {
 	var validationError utils.ValidationError
 	var count int
 
-	query := infrastructure.DB.Table("order").Select("count(*)")
+	query := infrastructure.DB.Table("order_snacks").Select("count(*)")
 
 	if s.EnableSoftDelete {
 		query = query.Where(fmt.Sprintf("%s IS NULL", s.DeletedAtStr))
